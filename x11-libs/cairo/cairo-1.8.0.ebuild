@@ -63,6 +63,7 @@ src_unpack() {
 	# We need to run elibtoolize to ensure correct so versioning on FreeBSD
 	elibtoolize
 	epatch "${FILESDIR}/0001-Fix-glitz-support-for-24.8-fixed-point.patch"
+	epatch "${FILESDIR}/cairo-1.2.4-lcd-cleartype-like.diff"
 }
 
 src_compile() {
