@@ -1,0 +1,89 @@
+diff -ruN dbus-1.2.4.orig/configure.in dbus-1.2.4/configure.in
+--- dbus-1.2.4.orig/configure.in	2008-10-15 08:29:29.000000000 -0500
++++ dbus-1.2.4/configure.in	2008-10-15 08:42:02.000000000 -0500
+@@ -890,7 +890,10 @@
+ fi
+ 
+ # Thread lib detection
+-AC_CHECK_FUNC(pthread_cond_timedwait,,[AC_CHECK_LIB(pthread,pthread_cond_timedwait,
++AC_CHECK_FUNC(pthread_cond_timedwaid,,[AC_CHECK_LIB(pthread,pthread_cond_timedwait,
++						    [THREAD_LIBS="-lpthread"])])
++
++AC_CHECK_FUNC(pthread_condattr_setclock,,[AC_CHECK_LIB(pthread,pthread_condattr_setclock,
+                                                     [THREAD_LIBS="-lpthread"])])
+ 
+ # SELinux detection
+diff -ruN dbus-1.2.4.orig/dbus/dbus-sysdeps-pthread.c dbus-1.2.4/dbus/dbus-sysdeps-pthread.c
+--- dbus-1.2.4.orig/dbus/dbus-sysdeps-pthread.c	2008-10-15 08:29:29.000000000 -0500
++++ dbus-1.2.4/dbus/dbus-sysdeps-pthread.c	2008-10-15 08:37:26.000000000 -0500
+@@ -25,6 +25,8 @@
+ #include "dbus-sysdeps.h"
+ #include "dbus-threads.h"
+ 
++#include <unistd.h>
++#include <sys/syscall.h>
+ #include <sys/time.h>
+ #include <pthread.h>
+ #include <string.h>
+@@ -67,6 +69,8 @@
+ } while (0)
+ #endif /* !DBUS_DISABLE_ASSERT */
+ 
++static int no_monotonic_timer;
++
+ static DBusMutex*
+ _dbus_pthread_mutex_new (void)
+ {
+@@ -184,14 +188,28 @@
+ _dbus_pthread_condvar_new (void)
+ {
+   DBusCondVarPThread *pcond;
++  pthread_condattr_t attr;
++  struct timespec dummy;
+   int result;
+   
+   pcond = dbus_new (DBusCondVarPThread, 1);
+   if (pcond == NULL)
+     return NULL;
+ 
+-  result = pthread_cond_init (&pcond->cond, NULL);
++  pthread_condattr_init( &attr );
++
++#ifdef CLOCK_MONOTONIC
++  if((syscall(__NR_clock_getres, CLOCK_MONOTONIC, &dummy) == 0) &&
++      (pthread_condattr_setclock(&attr, CLOCK_MONOTONIC) == 0))
++    {
++      no_monotonic_timer = 0;
++    } else {
++      no_monotonic_timer = 1;
++    }
++#endif
+ 
++  result = pthread_cond_init (&pcond->cond, &attr);
++  pthread_condattr_destroy( &attr );
+   if (result == EAGAIN || result == ENOMEM)
+     {
+       dbus_free (pcond);
+@@ -243,12 +261,21 @@
+   DBusCondVarPThread *pcond = DBUS_COND_VAR_PTHREAD (cond);
+   struct timeval time_now;
+   struct timespec end_time;
++  struct timespec monotonic_timer;
+   int result;
+   int old_count;
+   
+   _dbus_assert (pmutex->count > 0);
+   _dbus_assert (pthread_equal (pmutex->holder, pthread_self ()));  
+-  
++#ifdef CLOCK_MONOTONIC
++  if(!no_monotonic_timer)
++    {
++      syscall(__NR_clock_gettime, CLOCK_MONOTONIC, &monotonic_timer);
++      time_now.tv_sec = monotonic_timer.tv_sec;
++      time_now.tv_usec = monotonic_timer.tv_nsec / 1000;
++    }
++  else
++#endif
+   gettimeofday (&time_now, NULL);
+   
+   end_time.tv_sec = time_now.tv_sec + timeout_milliseconds / 1000;

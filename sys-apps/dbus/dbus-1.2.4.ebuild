@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/sys-apps/dbus/dbus-1.2.3-r1.ebuild,v 1.6 2008/10/08 09:08:46 armin76 Exp $
 
-inherit eutils multilib flag-o-matic
+inherit eutils multilib flag-o-matic autotools
 
 DESCRIPTION="A message bus system, a simple way for applications to talk to each other"
 HOMEPAGE="http://dbus.freedesktop.org/"
@@ -22,6 +22,13 @@ DEPEND="${RDEPEND}
 	dev-util/pkgconfig
 	doc? (	app-doc/doxygen
 		app-text/xmlto )"
+
+src_unpack() {
+	unpack ${A}
+	cd ${S}
+	epatch "${FILESDIR}/${PN}-1.2.4-monotonic-timer-for-pthread-timeout.patch"
+	eautoreconf
+}
 
 src_compile() {
 	# so we can get backtraces from apps
