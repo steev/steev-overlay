@@ -12,7 +12,7 @@ SRC_URI="http://protobuf.googlecode.com/files/${MY_P}.tar.bz2"
 
 LICENSE="Apache-2.0"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~ppc ~x86"
 IUSE="examples java python vim-syntax"
 
 DEPEND="${DEPEND} java? ( >=virtual/jdk-1.5 )
