@@ -9,7 +9,7 @@ SRC_URI="mirror://sourceforge/ufdbguard/ufdbGuard-${PV}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~x86"
+KEYWORDS="~amd64 ~ppc ~x86"
 
 DEPEND="dev-libs/openssl
 		app-arch/bzip2
