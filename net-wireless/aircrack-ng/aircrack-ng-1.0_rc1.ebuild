@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-inherit toolchain-funcs
+inherit versionator
 
-MY_PV=${PV/_/-}
+MY_PV=$(replace_version_separator 2 '-')
 
 DESCRIPTION="WLAN tools for breaking 802.11 WEP/WPA keys"
 HOMEPAGE="http://www.aircrack-ng.org"
@@ -12,38 +12,25 @@ SRC_URI="http://download.aircrack-ng.org/${PN}-${MY_PV}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ppc ~x86 ~x86-fbsd"
-IUSE="wifi"
+KEYWORDS="~amd64 ~ppc ~x86"
 
-DEPEND="wifi? ( net-libs/libpcap )"
+IUSE="+sqlite"
+
+DEPEND="dev-libs/openssl
+        sqlite? ( >=dev-db/sqlite-3.4 )"
+RDEPEND="${DEPEND}
+	net-wireless/iw"
 
 S="${WORKDIR}/${PN}-${MY_PV}"
 
+have_sqlite() {
+	use sqlite && echo "true" || echo "false"
+}
+
 src_compile() {
-	local target
-	use wifi || target="userland"
-	emake -e CC="$(tc-getCC)" ${target} || die "emake failed"
+	emake sqlite=$(have_sqlite) || die "emake failed"
 }
 
 src_install() {
-	local target
-	use wifi && target="install" || target="install_userland"
-	emake \
-		prefix=/usr \
-		docdir="/usr/share/doc/${PF}" \
-		mandir="/usr/share/man/man1" \
-		destdir="${D}" \
-		${target} \
-		doc \
-		|| die "emake install failed"
-}
-
-src_test() {
-	#./makeivs wep.ivs 11111111111111111111111111 || die 'generating ivs file failed'
-	#./aircrack-ng wep.ivs || die 'cracking WEP key failed'
-
-	# Upstream uses signal in order to quit,
-	# So protect busybox with process group leader.
-	"$(tc-getCC)" -o process-group-leader "${FILESDIR}/process-group-leader.c"
-	./process-group-leader ./aircrack-ng -w test/password.lst test/wpa.cap || die 'cracking WPA key failed'
+	emake prefix="${ROOT}/usr" DESTDIR="${D}" sqlite=$(have_sqlite) install || die "emake install failed"
 }
