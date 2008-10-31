@@ -1,0 +1,11 @@
+--- libproxy-0.2.3-old/configure.ac	2008-06-05 22:56:16.000000000 +0200
++++ libproxy-0.2.3/configure.ac	2008-10-24 22:21:12.000000000 +0200
+@@ -19,7 +19,7 @@
+ PKG_CHECK_MODULES(mozjs, xulrunner-js, have_mozjs=yes, 
+ 		[PKG_CHECK_MODULES(mozjs, firefox-js, have_mozjs=yes,
+ 		[PKG_CHECK_MODULES(mozjs, mozilla-js, have_mozjs=yes, have_mozjs=no)])])
+-PKG_CHECK_MODULES(NetworkManager, NetworkManager, 
++PKG_CHECK_MODULES(NetworkManager, NetworkManager dbus-1, 
+ 					have_networkmanager=yes, have_networkmanager=no)
+ 
+ # Environmental Variable
