@@ -5,8 +5,10 @@
 inherit versionator
 
 DESCRIPTION="Tool for setting monitor mode interfaces with mac80211 drivers"
-HOMEPAGE="http://www.aircrack-ng.org"
-SRC_URI="http://dl.aircrack-ng.org/${PN}.tar.bz2"
+#HOMEPAGE="http://www.aircrack-ng.org"
+HOMEPAGE="http://wireless.kernel.org/en/users/Documentation/iw"
+#SRC_URI="http://dl.aircrack-ng.org/${PN}.tar.bz2"
+SRC_URI="http://wireless.kernel.org/download/iw/${P}.tar.bz2"
 
 LICENSE="as-is"
 SLOT="0"
@@ -16,7 +18,7 @@ DEPEND=">=dev-libs/libnl-1.1"
 RDEPEND="${DEPEND}"
 
 src_compile() {
-	emake || die "emake failed"
+	emake  || die "emake failed"
 }
 
 src_install() {
