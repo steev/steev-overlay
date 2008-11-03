@@ -275,12 +275,19 @@ EPATCH_SUFFIX="patch"
 GENTOO_PATCHES=(
 	"${FILESDIR}/1.4-fpic-libxf86config.patch"
 	"${FILESDIR}/1.4-fix-kdrive-automake.patch"
+	"${FILESDIR}/xserver-1.5.0-hide-cursor.patch"
+	"${FILESDIR}/xserver-1.5.2-exa-sync-less.patch"
+	"${FILESDIR}/xorg-x11-server-1.1.0-no-move-damage.patch"
+	"${FILESDIR}/xserver-1.4.99-dont-backfill-bg-none.patch"
+	"${FILESDIR}/xserver-1.5.0-force-SwitchCoreKeyboard-for-evdev.patch"
+	"${FILESDIR}/xserver-1.5.2-no-duplicate-devices.patch"
+	"${FILESDIR}/1.5.2-force-LC_ALL-C-when-running-awk.patch"
 	)
 
 # These have been sent upstream
 UPSTREAMED_PATCHES=(
 	"${FILESDIR}/vm86-masks.patch"
-	"${FILESDIR}/test.patch"
+
 )
 
 PATCHES=(
