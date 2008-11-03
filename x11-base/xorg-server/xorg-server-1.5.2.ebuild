@@ -280,6 +280,7 @@ GENTOO_PATCHES=(
 # These have been sent upstream
 UPSTREAMED_PATCHES=(
 	"${FILESDIR}/vm86-masks.patch"
+	"${FILESDIR}/test.patch"
 )
 
 PATCHES=(

@@ -17,11 +17,17 @@ KEYWORDS="~amd64 ~ppc ~x86"
 DEPEND=">=dev-libs/libnl-1.1"
 RDEPEND="${DEPEND}"
 
+src_unpack() {
+	unpack ${A}
+	cd "${S}"
+	epatch "${FILESDIR}"/iw-0.9.6-remove_useless_code.patch
+}
+
 src_compile() {
 	emake  || die "emake failed"
 }
 
-src_install() {
-	mkdir -p ${D}usr/bin
-	cp iw ${D}usr/bin || die "Could not copy iw"
-}
+#src_install() {
+#	mkdir -p ${D}usr/bin
+#	cp iw ${D}usr/bin || die "Could not copy iw"
+#}
