@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $HEADER: $
 
-inherit versionator
+inherit eutils versionator
 
 DESCRIPTION="Tool for setting monitor mode interfaces with mac80211 drivers"
 #HOMEPAGE="http://www.aircrack-ng.org"
