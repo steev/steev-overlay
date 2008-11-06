@@ -27,7 +27,7 @@ src_compile() {
 	emake  || die "emake failed"
 }
 
-#src_install() {
-#	mkdir -p ${D}usr/bin
-#	cp iw ${D}usr/bin || die "Could not copy iw"
-#}
+src_install() {
+	mkdir -p ${D}usr/bin
+	cp iw ${D}usr/bin || die "Could not copy iw"
+}
