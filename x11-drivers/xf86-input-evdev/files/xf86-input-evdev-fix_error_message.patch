@@ -1,0 +1,11 @@
+diff --git a/src/evdev.c b/src/evdev.c
+index 638831d..3051531 100644
+--- a/src/evdev.c
++++ b/src/evdev.c
+@@ -1118,7 +1118,7 @@ EvdevCacheCompare(InputInfoPtr pInfo, BOOL compare)
+if (ioctl(pInfo->fd,
+EVIOCGBIT(0, sizeof(bitmask)), bitmask) < 0) {
+- xf86Msg(X_ERROR, "ioctl EVIOCGNAME failed: %s\n", strerror(errno));
++ xf86Msg(X_ERROR, "ioctl EVIOCGBIT failed: %s\n", strerror(errno));
+goto error;
+}
