@@ -130,8 +130,7 @@ src_unpack() {
 	epatch
 
 	epatch "${FILESDIR}"/${P}-ppc64.patch
-	epatch "${FILESDIR}"/${P}-acpi_netlink.patch
-
+	epatch "${FILESDIR}"/add-netlink-support-to-hal-0.5.11.patch
 	eautoreconf
 }
 
@@ -160,7 +159,7 @@ src_compile() {
 				acpi="$acpi --disable-acpi-ibm --disable-acpi-toshiba"
 			fi
 
-			acpi="$acpi --enable-acpi-proc --enable-acpi-netlink --enable-acpi-acpid"
+			acpi="$acpi --enable-acpi-proc --enable-acpi-acpid"
 		else
 			acpi="$acpi --disable-acpi-ibm --disable-acpi-toshiba"
 			acpi="$acpi --disable-acpi-proc --disable-acpi-acpid"
