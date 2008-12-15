@@ -14,20 +14,15 @@ LICENSE="as-is"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86"
 
-DEPEND=">=dev-libs/libnl-1.1"
-RDEPEND="${DEPEND}"
+RDEPEND="=dev-libs/libnl-1*"
+DEPEND="${RDEPEND}
+	>=dev-util/pkgconfig-0.22"
 
 src_unpack() {
 	unpack ${A}
-	cd "${S}"
-	epatch "${FILESDIR}"/iw-0.9.6-remove_useless_code.patch
-}
-
-src_compile() {
-	emake  || die "emake failed"
+	sed -i -e '/^CFLAGS/s/-O2 -g//' "${S}"/Makefile || die
 }
 
 src_install() {
-	mkdir -p ${D}usr/bin
-	cp iw ${D}usr/bin || die "Could not copy iw"
+	emake DESTDIR="${D}" install || die "emake install failed"
 }
