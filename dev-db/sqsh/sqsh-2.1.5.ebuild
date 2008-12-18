@@ -2,12 +2,12 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/dev-db/sqsh/sqsh-2.1.4.ebuild,v 1.2 2007/07/22 10:01:39 graaff Exp $
 
-inherit eutils
+inherit eutils autotools
 
 DESCRIPTION="Replacement for the venerable 'isql' program supplied by Sybase."
 HOMEPAGE="http://sourceforge.net/projects/sqsh/"
-SRC_URI="mirror://sourceforge/${PN}/${P}.tgz
-	mirror://gentoo/${PN}-2.1.3-autotools.patch.bz2"
+SRC_URI="mirror://sourceforge/${PN}/${P}.tgz"
+#	mirror://gentoo/${PN}-2.1.3-autotools.patch.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -27,9 +27,12 @@ DEPEND="dev-db/freetds
 
 src_unpack() {
 	unpack ${A}; cd ${S}
-	epatch ${WORKDIR}/${PN}-2.1.3-autotools.patch
+	epatch "${FILESDIR}"/${PN}.diff
+	epatch "${FILESDIR}"/${PN}-2.1.3-configure.in-motif.patch
+	epatch "${FILESDIR}"/${PN}-2.1.4-configure.in-x.patch
 	# Patch knicked from ports so that we don't pass -ldb when in a BSD
 	epatch ${FILESDIR}/${PN}-2.1.3-fbsd-configure.patch
+	eautoconf
 }
 
 src_compile() {
@@ -47,7 +50,8 @@ src_compile() {
 }
 
 src_install () {
-	einstall install.man || die
-
+	#einstall install.man || die
+	#emake DESTDIR="${D}" install
+	einstall DESTDIR="${D}" install.man || die
 	dodoc INSTALL README doc/*
 }

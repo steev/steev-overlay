@@ -1,0 +1,30 @@
+--- sqsh-2.1.3/configure.in	2004-04-12 22:02:13.000000000 +0100
++++ sqsh-van/configure.in	2005-04-08 11:40:15.000000000 +0100
+@@ -47,21 +47,23 @@
+ AC_ARG_WITH([motif], 
+ 	[  --with-motif            support X11/Motif widgets],
+ 	[
+-		if test $with_motif != "yes"
++	 	if test $with_motif = "no"
+ 		then
++			DEF_MOTIF="# -DUSE_MOTIF"
++		elif test $with_motif != "yes"
++		then
++			DEF_MOTIF="-DUSE_MOTIF"
+ 			MOTIF_PATH=$with_motif
+ 			with_motif="yes"
+ 			MOTIF_INCDIR="-I$MOTIF_PATH/include/X11"
+ 			MOTIF_LIBDIR="-L$MOTIF_PATH/lib"
+ 		else
++			DEF_MOTIF="-DUSE_MOTIF"
+ 			MOTIF_INCDIR="# -I/usr/X11/include"
+ 			MOTIF_LIBDIR="# -L/usr/X11/lib"
+ 		fi
+ 
+ 		with_x="yes"
+-		DEF_MOTIF="-DUSE_MOTIF"
+-		AC_SUBST(MOTIF_PATH)
+-		AC_SUBST(MOTIF_LIBS)
+ 	],[
+ 		DEF_MOTIF="# -DUSE_MOTIF"
+ 		with_motif="no"
