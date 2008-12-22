@@ -50,8 +50,8 @@ src_compile() {
 }
 
 src_install () {
-	#einstall install.man || die
+	einstall install.man || die
 	#emake DESTDIR="${D}" install
-	einstall DESTDIR="${D}" install.man || die
+	#einstall DESTDIR="${D}" install.man || die
 	dodoc INSTALL README doc/*
 }

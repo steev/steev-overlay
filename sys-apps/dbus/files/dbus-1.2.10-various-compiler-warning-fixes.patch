@@ -1,0 +1,107 @@
+commit f8d2ef4aca7d74788b9c03272e9bb536254a8ac6
+Author: Colin Walters <walters@verbum.org>
+Date:   Fri Dec 19 18:54:59 2008 -0500
+
+    Various compiler warning fixes
+
+diff --git a/bus/config-parser.h b/bus/config-parser.h
+index 1f2d3d9..bb3a30f 100644
+--- a/bus/config-parser.h
++++ b/bus/config-parser.h
+@@ -65,6 +65,7 @@ const char* bus_config_parser_get_type         (BusConfigParser *parser);
+ DBusList**  bus_config_parser_get_addresses    (BusConfigParser *parser);
+ DBusList**  bus_config_parser_get_mechanisms   (BusConfigParser *parser);
+ dbus_bool_t bus_config_parser_get_fork         (BusConfigParser *parser);
++dbus_bool_t bus_config_parser_get_allow_anonymous (BusConfigParser *parser);
+ dbus_bool_t bus_config_parser_get_syslog       (BusConfigParser *parser);
+ dbus_bool_t bus_config_parser_get_keep_umask   (BusConfigParser *parser);
+ const char* bus_config_parser_get_pidfile      (BusConfigParser *parser);
+diff --git a/bus/driver.c b/bus/driver.c
+index 05ecd56..c97bff5 100644
+--- a/bus/driver.c
++++ b/bus/driver.c
+@@ -1411,7 +1411,7 @@ bus_driver_handle_get_adt_audit_session_data (DBusConnection *connection,
+   BusService *serv;
+   DBusConnection *conn;
+   DBusMessage *reply;
+-  char *data = NULL;
++  void *data = NULL;
+   dbus_uint32_t data_size;
+ 
+   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
+diff --git a/dbus/dbus-marshal-basic.c b/dbus/dbus-marshal-basic.c
+index 0a33ff1..724d94b 100644
+--- a/dbus/dbus-marshal-basic.c
++++ b/dbus/dbus-marshal-basic.c
+@@ -1333,7 +1333,7 @@ _dbus_verbose_bytes (const unsigned char *data,
+ 
+   if (aligned != data)
+     {
+-      _dbus_verbose ("%4d\t%p: ", - (data - aligned), aligned);
++      _dbus_verbose ("%4ld\t%p: ", - (long)(data - aligned), aligned);
+       while (aligned != data)
+         {
+           _dbus_verbose ("    ");
+diff --git a/dbus/dbus-spawn.c b/dbus/dbus-spawn.c
+index 35ccba6..f4e3b58 100644
+--- a/dbus/dbus-spawn.c
++++ b/dbus/dbus-spawn.c
+@@ -36,6 +36,8 @@
+ #include <errno.h>
+ #endif
+ 
++extern char **environ;
++
+ /**
+  * @addtogroup DBusInternalsUtils
+  * @{
+@@ -914,8 +916,6 @@ do_exec (int                       child_err_report_fd,
+ 
+   if (envp == NULL)
+     {
+-      extern char **environ;
+-
+       _dbus_assert (environ != NULL);
+ 
+       envp = environ;
+diff --git a/dbus/dbus-sysdeps-util-unix.c b/dbus/dbus-sysdeps-util-unix.c
+index 7f7b265..0392804 100644
+--- a/dbus/dbus-sysdeps-util-unix.c
++++ b/dbus/dbus-sysdeps-util-unix.c
+@@ -43,6 +43,7 @@
+ #include <sys/socket.h>
+ #include <dirent.h>
+ #include <sys/un.h>
++#include <syslog.h>
+ #ifdef HAVE_LIBAUDIT
+ #include <sys/prctl.h>
+ #include <sys/capability.h>
+diff --git a/dbus/dbus-sysdeps.c b/dbus/dbus-sysdeps.c
+index d740f87..00a1a3d 100644
+--- a/dbus/dbus-sysdeps.c
++++ b/dbus/dbus-sysdeps.c
+@@ -51,6 +51,8 @@ _DBUS_DEFINE_GLOBAL_LOCK (win_fds);
+ _DBUS_DEFINE_GLOBAL_LOCK (sid_atom_cache);
+ _DBUS_DEFINE_GLOBAL_LOCK (system_users);
+ 
++extern char **environ;
++
+ /**
+  * @defgroup DBusSysdeps Internal system-dependent API
+  * @ingroup DBusInternals
+@@ -191,7 +193,6 @@ _dbus_clearenv (void)
+   if (clearenv () != 0)
+      rc = FALSE;
+ #else
+-  extern char **environ;
+ 
+   if (environ != NULL)
+     environ[0] = NULL;
+@@ -210,7 +211,6 @@ char **
+ _dbus_get_environment (void)
+ {
+   int i, length;
+-  extern char **environ;
+   char **environment;
+ 
+   _dbus_assert (environ != NULL);

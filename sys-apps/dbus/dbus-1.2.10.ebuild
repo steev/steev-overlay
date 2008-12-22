@@ -27,6 +27,7 @@ src_unpack() {
 	unpack ${A}
 	cd ${S}
 	epatch "${FILESDIR}/${PN}-1.2.4-monotonic-timer-for-pthread-timeout.patch"
+	epatch "${FILESDIR}/${PN}-1.2.10-various-compiler-warning-fixes.patch"
 	eautoreconf
 }
 
