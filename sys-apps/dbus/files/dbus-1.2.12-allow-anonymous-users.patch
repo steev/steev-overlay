@@ -1,0 +1,124 @@
+diff -rupN dbus-1.2.12/bus/bus.c dbus-1.2.12+anonymous/bus/bus.c
+--- dbus-1.2.12/bus/bus.c	2009-01-07 00:22:39.000000000 +0100
++++ dbus-1.2.12+anonymous/bus/bus.c	2009-02-02 05:12:34.000000000 +0100
+@@ -54,6 +54,7 @@ struct BusContext
+   BusMatchmaker *matchmaker;
+   BusLimits limits;
+   unsigned int fork : 1;
++  unsigned int allow_anonymous : 1;
+   unsigned int syslog : 1;
+   unsigned int keep_umask : 1;
+ };
+@@ -189,6 +190,9 @@ new_connection_callback (DBusServer     
+ 
+   dbus_connection_set_max_message_size (new_connection,
+                                         context->limits.max_message_size);
++
++  dbus_connection_set_allow_anonymous (new_connection,
++                                       context->allow_anonymous);
+   
+   /* on OOM, we won't have ref'd the connection so it will die. */
+ }
+@@ -386,6 +390,7 @@ process_config_first_time_only (BusConte
+     }
+ 
+   context->fork = bus_config_parser_get_fork (parser);
++  context->allow_anonymous = bus_config_parser_get_allow_anonymous (parser);
+   context->syslog = bus_config_parser_get_syslog (parser);
+   context->keep_umask = bus_config_parser_get_keep_umask (parser);
+   
+diff -rupN dbus-1.2.12/bus/config-parser.c dbus-1.2.12+anonymous/bus/config-parser.c
+--- dbus-1.2.12/bus/config-parser.c	2009-01-07 00:07:41.000000000 +0100
++++ dbus-1.2.12+anonymous/bus/config-parser.c	2009-02-02 05:20:34.000000000 +0100
+@@ -110,6 +110,7 @@ struct BusConfigParser
+   DBusHashTable *service_context_table; /**< Map service names to SELinux contexts */
+ 
+   unsigned int fork : 1; /**< TRUE to fork into daemon mode */
++  unsigned int allow_anonymous : 1; /**< TRUE to allow anonymous connections */
+ 
+   unsigned int syslog : 1; /**< TRUE to enable syslog */
+   unsigned int keep_umask : 1; /**< TRUE to keep original umask when forking */
+@@ -851,6 +852,20 @@ start_busconfig_child (BusConfigParser  
+ 
+       return TRUE;
+     }
++  else if (element_type == ELEMENT_ALLOW_ANONYMOUS)
++    {
++      if (!check_no_attributes (parser, "allow_anonymous", attribute_names, attribute_values, error))
++        return FALSE;
++
++      if (push_element (parser, ELEMENT_ALLOW_ANONYMOUS) == NULL)
++        {
++          BUS_SET_OOM (error);
++          return FALSE;
++        }
++
++      parser->allow_anonymous = TRUE;
++      return TRUE;
++    }
+   else if (element_type == ELEMENT_SERVICEDIR)
+     {
+       if (!check_no_attributes (parser, "servicedir", attribute_names, attribute_values, error))
+@@ -1994,6 +2009,7 @@ bus_config_parser_end_element (BusConfig
+     case ELEMENT_ASSOCIATE:
+     case ELEMENT_STANDARD_SESSION_SERVICEDIRS:
+     case ELEMENT_STANDARD_SYSTEM_SERVICEDIRS:
++    case ELEMENT_ALLOW_ANONYMOUS:
+       break;
+     }
+ 
+@@ -2279,6 +2295,7 @@ bus_config_parser_content (BusConfigPars
+     case ELEMENT_KEEP_UMASK:
+     case ELEMENT_STANDARD_SESSION_SERVICEDIRS:    
+     case ELEMENT_STANDARD_SYSTEM_SERVICEDIRS:    
++    case ELEMENT_ALLOW_ANONYMOUS:
+     case ELEMENT_SELINUX:
+     case ELEMENT_ASSOCIATE:
+       if (all_whitespace (content))
+@@ -2600,6 +2617,12 @@ bus_config_parser_get_fork (BusConfigPar
+ }
+ 
+ dbus_bool_t
++bus_config_parser_get_allow_anonymous (BusConfigParser   *parser)
++{
++  return parser->allow_anonymous;
++}
++
++dbus_bool_t
+ bus_config_parser_get_syslog (BusConfigParser   *parser)
+ {
+   return parser->syslog;
+diff -rupN dbus-1.2.12/bus/config-parser-common.c dbus-1.2.12+anonymous/bus/config-parser-common.c
+--- dbus-1.2.12/bus/config-parser-common.c	2009-01-07 00:07:57.000000000 +0100
++++ dbus-1.2.12+anonymous/bus/config-parser-common.c	2009-02-02 05:12:34.000000000 +0100
+@@ -114,6 +114,10 @@ bus_config_parser_element_name_to_type (
+     {
+       return ELEMENT_ASSOCIATE;
+     }
++  else if (strcmp (name, "allow_anonymous") == 0)
++    {
++      return ELEMENT_ALLOW_ANONYMOUS;
++    }
+   else if (strcmp (name, "syslog") == 0)
+     {
+       return ELEMENT_SYSLOG;
+@@ -170,6 +174,8 @@ bus_config_parser_element_type_to_name (
+       return "selinux";
+     case ELEMENT_ASSOCIATE:
+       return "associate";
++    case ELEMENT_ALLOW_ANONYMOUS:
++      return "allow_anonymous";
+     case ELEMENT_SYSLOG:
+       return "syslog";
+     case ELEMENT_KEEP_UMASK:
+diff -rupN dbus-1.2.12/bus/config-parser-common.h dbus-1.2.12+anonymous/bus/config-parser-common.h
+--- dbus-1.2.12/bus/config-parser-common.h	2009-01-07 00:06:45.000000000 +0100
++++ dbus-1.2.12+anonymous/bus/config-parser-common.h	2009-02-02 05:12:34.000000000 +0100
+@@ -48,6 +48,7 @@ typedef enum
+   ELEMENT_ASSOCIATE,
+   ELEMENT_STANDARD_SESSION_SERVICEDIRS,
+   ELEMENT_STANDARD_SYSTEM_SERVICEDIRS,
++  ELEMENT_ALLOW_ANONYMOUS,
+   ELEMENT_SYSLOG,
+   ELEMENT_KEEP_UMASK
+ } ElementType;
