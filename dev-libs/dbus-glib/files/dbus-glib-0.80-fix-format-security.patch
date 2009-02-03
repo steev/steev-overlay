@@ -1,0 +1,25 @@
+From 91adfb1a3b1abadd0c087e49ccb73164a59a6491 Mon Sep 17 00:00:00 2001
+From: Frederic Crozat <fcrozat@mandriva.com>
+Date: Tue, 3 Feb 2009 14:00:50 +0100
+Subject: [PATCH] Fix format-security warning
+
+---
+ dbus/dbus-gobject.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dbus/dbus-gobject.c b/dbus/dbus-gobject.c
+index 95f062e..00cf56b 100644
+--- a/dbus/dbus-gobject.c
++++ b/dbus/dbus-gobject.c
+@@ -2350,7 +2350,7 @@ dbus_g_method_return (DBusGMethodInvocation *context, ...)
+       G_VALUE_COLLECT (&value, args, G_VALUE_NOCOPY_CONTENTS, &error);
+       if (error)
+ 	{
+-	  g_warning(error);
++	  g_warning("%s", error);
+ 	  g_free (error);
+ 	}
+       _dbus_gvalue_marshal (&iter, &value);
+-- 
+1.6.1.2
+
