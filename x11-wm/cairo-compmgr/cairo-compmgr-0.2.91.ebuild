@@ -11,14 +11,11 @@ SRC_URI="http://download.tuxfamily.org/ccm/cairo-compmgr/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~x86"
+KEYWORDS="~ppc ~x86"
 IUSE=""
 
-RDEPEND="gnome-base/gconf
-	>=x11-libs/gtk+-2.10
+RDEPEND=">=x11-libs/gtk+-2.10
 	>=media-libs/glitz-0.5.6
 	>=x11-libs/pixman-0.9.6
-	>=x11-proto/glproto-1.4.9
-	gnome-base/libgnomeui"
+	>=x11-proto/glproto-1.4.9"
 DEPEND="${RDEPEND}"
-
