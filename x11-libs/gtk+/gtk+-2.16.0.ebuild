@@ -25,7 +25,7 @@ RDEPEND="x11-libs/libXrender
 	x11-libs/libXcomposite
 	x11-libs/libXdamage
 	xinerama? ( x11-libs/libXinerama )
-	>=dev-libs/glib-2.17.6
+	>=dev-libs/glib-2.19.7
 	>=x11-libs/pango-1.20
 	>=dev-libs/atk-1.13
 	>=x11-libs/cairo-1.6
@@ -79,13 +79,13 @@ src_unpack() {
 	epatch "${FILESDIR}/${PN}-2.14.3-limit-gtksignal-includes.patch"
 
 	# Fix filechooser placement.  bug #239360
-	epatch "${FILESDIR}/${PN}-2.14.7-filechooser.patch"
+	#epatch "${FILESDIR}/${PN}-2.14.7-filechooser.patch"
 
 	# Ignore broken curve tests, bug #238995
-	epatch "${FILESDIR}/${PN}-2.14.7-ignore-gtkcurve.patch"
+	#epatch "${FILESDIR}/${PN}-2.14.7-ignore-gtkcurve.patch"
 
 	# Uncertain mime fix, bug #257980
-	epatch "${FILESDIR}/${PN}-2.14.7-uncertain-mime.patch"
+	#epatch "${FILESDIR}/${PN}-2.14.7-uncertain-mime.patch"
 
 	# -O3 and company cause random crashes in applications. Bug #133469
 	replace-flags -O3 -O2
