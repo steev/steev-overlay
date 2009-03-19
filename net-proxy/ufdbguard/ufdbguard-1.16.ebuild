@@ -1,6 +1,6 @@
-# Copyright 1999-2008 Gentoo Foundation
+# Copyright 1999-2009 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/net-proxy/ufdbguard/ufdbguard-1.13.ebuild,v 1.2 2008/10/12 08:03:18 mrness Exp $
+# $Header: $
 
 inherit eutils
 DESCRIPTION="ufdbGuard is a redirector for the Squid internet proxy."
