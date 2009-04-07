@@ -12,10 +12,19 @@ SRC_URI="http://download.tuxfamily.org/ccm/cairo-compmgr/${P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~ppc ~x86"
-IUSE=""
+IUSE="glitz"
 
 RDEPEND=">=x11-libs/gtk+-2.10
-	>=media-libs/glitz-0.5.6
+	glitz? ( >=media-libs/glitz-0.5.6 )
 	>=x11-libs/pixman-0.9.6
 	>=x11-proto/glproto-1.4.9"
 DEPEND="${RDEPEND}"
+
+src_compile() {
+	econf \
+	$(use_enable glitz) \
+	--disable-glitz-tfp \
+	--enable-shave || die "econf failed"
+
+	emake || die "emake failed"
+}

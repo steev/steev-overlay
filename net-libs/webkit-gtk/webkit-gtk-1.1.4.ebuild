@@ -8,7 +8,7 @@ inherit autotools
 DESCRIPTION="Open source web browser engine"
 HOMEPAGE="http://www.webkit.org/"
 #SRC_URI="http://nightly.webkit.org/files/trunk/src/${MY_P}.tar.bz2"
-SRC_URI="http://cafe.minaslivre.org/webkit/webkit-${PV}.tar.gz"
+SRC_URI="http://www.webkitgtk.org/webkit-${PV}.tar.gz"
 
 LICENSE="LGPL-2 LGPL-2.1 BSD"
 SLOT="0"
