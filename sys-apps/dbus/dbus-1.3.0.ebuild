@@ -1,8 +1,8 @@
-# Copyright 1999-2008 Gentoo Foundation
+# Copyright 1999-2009 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-apps/dbus/dbus-1.2.3-r1.ebuild,v 1.6 2008/10/08 09:08:46 armin76 Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-apps/dbus/dbus-1.2.12.ebuild,v 1.3 2009/04/23 05:46:44 nirbheek Exp $
 
-inherit eutils multilib flag-o-matic autotools
+inherit eutils multilib flag-o-matic
 
 DESCRIPTION="A message bus system, a simple way for applications to talk to each other"
 HOMEPAGE="http://dbus.freedesktop.org/"
@@ -10,8 +10,8 @@ SRC_URI="http://dbus.freedesktop.org/releases/dbus/${P}.tar.gz"
 
 LICENSE="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
-KEYWORDS="alpha amd64 ~arm hppa ia64 ~mips ~ppc ppc64 ~s390 ~sh sparc x86 ~x86-fbsd"
-IUSE="debug doc selinux X"
+KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~x86-fbsd"
+IUSE="debug doc selinux test X"
 
 RDEPEND="X? ( x11-libs/libXt x11-libs/libX11 )
 	selinux? ( sys-libs/libselinux
@@ -25,20 +25,17 @@ DEPEND="${RDEPEND}
 
 src_unpack() {
 	unpack ${A}
-	cd ${S}
-#	epatch "${FILESDIR}/${PN}-1.2.4-monotonic-timer-for-pthread-timeout.patch"
-#	epatch "${FILESDIR}/${PN}-1.2.10-various-compiler-warning-fixes.patch"
-#	eautoreconf
-	epatch "${FILESDIR}/${PN}-1.2.12-allow-anonymous-users.patch"
+	cd "${S}"
+
+	# Tests were restricted because of this
+	sed -e 's/.*bus_dispatch_test.*/printf ("Disabled due to excess noise\\n");/' \
+		-e '/"dispatch"/d' -i "${S}/bus/test-main.c"
 }
 
 src_compile() {
 	# so we can get backtraces from apps
 	append-flags -rdynamic
 
-	local myconf=""
-
-	hasq test ${FEATURES} && myconf="${myconf} --enable-tests=yes"
 	# libaudit is *only* used in DBus wrt SELinux support, so disable it, if
 	# not on an SELinux profile.
 	econf \
@@ -49,6 +46,8 @@ src_compile() {
 		$(use_enable selinux libaudit)	\
 		$(use_enable debug verbose-mode) \
 		$(use_enable debug asserts) \
+		$(use_enable test tests) \
+		$(use_enable test asserts) \
 		--with-xml=expat \
 		--with-system-pid-file=/var/run/dbus.pid \
 		--with-system-socket=/var/run/dbus/system_bus_socket \
@@ -57,7 +56,6 @@ src_compile() {
 		--localstatedir=/var \
 		$(use_enable doc doxygen-docs) \
 		--disable-xml-docs \
-		${myconf} \
 		|| die "econf failed"
 
 	# after the compile, it uses a selinuxfs interface to
@@ -78,11 +76,11 @@ src_install() {
 	newinitd "${FILESDIR}"/dbus.init-1.0 dbus
 
 	if use X ; then
-	# dbus X session script (#77504)
-	# turns out to only work for GDM. has been merged into other desktop
-	# (kdm and such scripts)
-	exeinto /etc/X11/xinit/xinitrc.d/
-	doexe "${FILESDIR}"/30-dbus
+		# dbus X session script (#77504)
+		# turns out to only work for GDM. has been merged into other desktop
+		# (kdm and such scripts)
+		exeinto /etc/X11/xinit/xinitrc.d/
+		doexe "${FILESDIR}"/30-dbus
 	fi
 
 	# needs to exist for the system socket
@@ -118,12 +116,19 @@ pkg_postinst() {
 	elog
 	ewarn "You MUST run 'revdep-rebuild' after emerging this package"
 	elog
-	ewarn "If you are currently running X with the hal useflag enabled"
-	ewarn "restarting the dbus service WILL restart X as well"
-	ebeep 5
-	elog
 	ewarn "You must restart D-Bus \`/etc/init.d/dbus restart\` to run"
-	ewarn "the new version of the daemon. For many people, this means"
-	ewarn "exiting X as well."
+	ewarn "the new version of the daemon."
 
+	if has_version x11-base/xorg-server && built_with_use x11-base/xorg-server hal; then
+		elog
+		ewarn "You are currently running X with the hal useflag enabled"
+		ewarn "restarting the dbus service WILL restart X as well"
+		ebeep 5
+	fi
+
+	if use test; then
+		elog
+		ewarn "You have unit tests enabled, this results in an insecure library"
+		ewarn "It is recommended that you reinstall *without* FEATURES=test"
+	fi
 }
